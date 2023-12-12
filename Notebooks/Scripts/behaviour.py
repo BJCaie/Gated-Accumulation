@@ -295,19 +295,22 @@ def plotPsycDelays(df, numBins):
 
 def plotRTHistory(df, nback, condition):
     plt.figure()
-    for i in range(1, nback):
+    for i in range(0, nback):
         xs, ys = ecdf(df.loc[df[condition]==i]['Relative RT'])
         plt.plot(xs, ys, label= "%s back" % i)
         
     plt.title(label= "Relative RT %s" % condition)
+    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\cdf_rt_{condition}_relative", format='svg')
 
     plt.figure()
-    for i in range(1, nback):
+    for i in range(0, nback):
         xs, ys = ecdf(df.loc[df[condition]==i]['Reaction Time: First Target'])
         plt.plot(xs, ys, label= "%s back" %i)
         
     plt.title(label= "Stim-locked RT %s" % condition)    
-    plt.xlim([0,400])
+    plt.xlim([-250,400])
+    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\cdf_rt_{condition}", format='svg')
+
     plt.show()
     
 def plotPsychometricFunction(df, axisHandle, plot, showImediate):
@@ -350,7 +353,7 @@ def plotRTDelays(data, minDelay, maxDelay, numBins):
     # Plot Reaction Time Distributions with alignment
     for i in range(numBins):
         axs[0,0].hist(delayidx[str(delays[i])]['Reaction Time: First Target'] + delayidx[str(delays[i])]['First Target Onset'],
-                       density = True, bins = 50, color = cmap(i/10))     
+                       density = True, bins = 50, color = cmap(i/5))     
         axs[0,0].set_xlim([750, 1750])
         axs[0,0].set_xlabel('Reaction Time (ms)')
         axs[0,0].set_ylabel('Count')
@@ -362,7 +365,7 @@ def plotRTDelays(data, minDelay, maxDelay, numBins):
         axs[1,0].set_ylabel('Count')
 
     # Plot Reaction Time Distributions aligned to 0
-        axs[0,1].hist(delayidx[str(delays[i])]['Reaction Time: First Target'], bins = 50, color = cmap(i/10), density=True)
+        axs[0,1].hist(delayidx[str(delays[i])]['Reaction Time: First Target'], bins = 50, color = cmap(i/5), density=True)
         axs[0,1].set_xlim([0, 400])
         axs[0,1].set_xlabel('Reaction Time (ms)')
         axs[0,1].set_ylabel('Count')
@@ -373,6 +376,7 @@ def plotRTDelays(data, minDelay, maxDelay, numBins):
         axs[1,1].set_xlim([0, 400])
         axs[1,1].set_xlabel('Reaction Time (ms)')
         axs[1,1].set_ylabel('Count')
+    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\rt_delays", format='svg')
 
 def binDelaydata(data, minDelay, maxDelay, numBins):
     """Split up free choice data into a dictionary by equally spaced delay time bins

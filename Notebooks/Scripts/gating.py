@@ -4,6 +4,7 @@ import math
 from matplotlib.pyplot import cm
 from scipy.stats import entropy
 import pandas as pd
+from skopt import load
 np.random.seed(0)
 
 class baselineDynamicIntegrator:
@@ -373,7 +374,8 @@ def plotBDIFit(modelFit, params, data, numBins, minDelay, maxDelay, plotLabel):
     
     # Return binned delay data for plotting
     if isinstance(data, pd.DataFrame):
-        delayidx = binDelaydata(data, minDelay = minDelay, maxDelay = maxDelay, numBins = numBins)            
+        delayidx = binDelaydata(data, minDelay = minDelay, maxDelay = maxDelay, numBins = numBins)           
+
     delays= np.linspace(minDelay, maxDelay, numBins)
     
     # Set plotting colours
@@ -405,8 +407,11 @@ def plotBDIFit(modelFit, params, data, numBins, minDelay, maxDelay, plotLabel):
         axs[0,1].plot(recoveredModel.ouMean)
         axs[0,1].fill_between(np.arange(1,2000), recoveredModel.ouMean - recoveredModel.ouVar,
                         recoveredModel.ouMean + recoveredModel.ouVar)
+        axs[0,1].axhline(y = modelFit.x[1])
+        axs[0,1].set_ylim([.4, 1])
 
         axs[1,1].plot(recoveredModel.pAnticipatory)
+        axs[1,1].set_ylim([0, .0009])
 
     plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\{plotLabel}_model_fit", format='svg')
     plt.show()
@@ -523,3 +528,105 @@ def plotModelParameters(params, minDelay, maxDelay, numBins):
         axs[1,1].plot(recoveredModel.pAnticipatory)
 
     plt.show()
+
+def plotModelOutputs(sequence_type, nback, numDelays, stat, savefile):
+    """ Generates 2D image plot of sampled model statistic by choice sequence and delay interval
+
+    Args:
+        sequence_type (str): 'rep' for repetitions, 'alt' for alternation
+        nback (int): number of trials back in choice sequence
+        numDelays (int): number of delay bins between 750 and 1250 ms
+        stat (str): 'Var' for model variance, 'Median' for model mean
+    """
+
+    ## Set delay times and empty grid for model output plotting
+    delays= np.linspace(750, 1250, numDelays)
+    modelVar = np.zeros([nback,len(delays)])
+
+    ## Load fitted model parameters, recompute model for each choice sequence
+    for seq in range(nback):
+        modelFit = load(fr'C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Model_Fits\modelfit_group_{sequence_type}_{seq}')
+        model = baselineDynamicIntegrator('Fitted Model', time = np.arange(1,2000), xO = modelFit.x[0], 
+                    theta = modelFit.x[1] , kappa = modelFit.x[2], sigma = modelFit.x[3], muR = modelFit.x[4],
+                    sR = modelFit.x[5], k = modelFit.x[6], scale = modelFit.x[7], maxT = 700)
+
+        # Loop over delay bins and plot data overlayed with model
+        for count, delay in enumerate(delays):
+
+            # Run model on single delay 
+            model.setDelayTimes(np.linspace(delay, delay, 1))
+            model.BDI()
+
+            # Sample model
+            sampledModel = np.random.choice(1999, 10000, p = model.combined / sum(model.combined))
+            
+            # compute chosen statistic
+            if stat ==  'Var':
+                modelVar[seq,count] = np.std(sampledModel)
+                vmin = 60
+                vmax = 180
+            elif stat == 'Median':
+                modelVar[seq,count] = np.median(sampledModel) - delay
+                vmin = 180
+                vmax = 240
+
+    ## Plot model output
+    fig, ax = plt.subplots()
+    im = ax.imshow(modelVar, cmap = 'RdBu', origin = 'lower', vmin = vmin, vmax = vmax)
+    cbar = fig.colorbar(im)
+    cbar.set_label(f'Sample Model {stat}')
+
+    ax.set_xlabel(f'{sequence_type} Number')
+    ax.set_ylabel('Delay Interval Bin')
+    plt.savefig(rf"{savefile}\{sequence_type}_{stat}model_fit", format='svg')
+
+def plotModelOutputs(sequence_type, nback, numDelays, stat, savefile):
+    """ Generates 2D image plot of sampled model statistic by choice sequence and delay interval
+
+    Args:
+        sequence_type (str): 'rep' for repetitions, 'alt' for alternation
+        nback (int): number of trials back in choice sequence
+        numDelays (int): number of delay bins between 750 and 1250 ms
+        stat (str): 'Var' for model variance, 'Median' for model mean
+    """
+
+    ## Set delay times and empty grid for model output plotting
+    delays= np.linspace(750, 1250, numDelays)
+    modelVar = np.zeros([nback,len(delays)])
+
+    ## Load fitted model parameters, recompute model for each choice sequence
+    for seq in range(nback):
+        modelFit = load(fr'C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Model_Fits\modelfit_group_{sequence_type}_{seq}')
+        model = baselineDynamicIntegrator('Fitted Model', time = np.arange(1,2000), xO = modelFit.x[0], 
+                    theta = modelFit.x[1] , kappa = modelFit.x[2], sigma = modelFit.x[3], muR = modelFit.x[4],
+                    sR = modelFit.x[5], k = modelFit.x[6], scale = modelFit.x[7], maxT = 700)
+
+        # Loop over delay bins and plot data overlayed with model
+        for count, delay in enumerate(delays):
+
+            # Run model on single delay 
+            model.setDelayTimes(np.linspace(delay, delay, 1))
+            model.BDI()
+
+            # Sample model
+            sampledModel = np.random.choice(1999, 10000, p = model.combined / sum(model.combined))
+            
+            # compute chosen statistic
+            if stat ==  'Var':
+                modelVar[seq,count] = np.std(sampledModel)
+                vmin = 60
+                vmax = 180
+            elif stat == 'Median':
+                modelVar[seq,count] = np.median(sampledModel) - delay
+                vmin = 180
+                vmax = 240
+
+    ## Plot model output
+    fig, ax = plt.subplots()
+    im = ax.imshow(modelVar, cmap = 'RdBu', origin = 'lower', vmin = vmin, vmax = vmax)
+    cbar = fig.colorbar(im)
+    cbar.set_label(f'Sample Model {stat}')
+
+    ax.set_xlabel(f'{sequence_type} Number')
+    ax.set_ylabel('Delay Interval Bin')
+    plt.savefig(rf"{savefile}\{sequence_type}_{stat}model_fit", format='svg')
