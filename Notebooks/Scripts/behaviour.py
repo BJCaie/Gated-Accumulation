@@ -300,7 +300,6 @@ def plotRTHistory(df, nback, condition):
         plt.plot(xs, ys, label= "%s back" % i)
         
     plt.title(label= "Relative RT %s" % condition)
-    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\cdf_rt_{condition}_relative", format='svg')
 
     plt.figure()
     for i in range(0, nback):
@@ -309,7 +308,6 @@ def plotRTHistory(df, nback, condition):
         
     plt.title(label= "Stim-locked RT %s" % condition)    
     plt.xlim([-250,400])
-    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\cdf_rt_{condition}", format='svg')
 
     plt.show()
     
@@ -376,7 +374,6 @@ def plotRTDelays(data, minDelay, maxDelay, numBins):
         axs[1,1].set_xlim([0, 400])
         axs[1,1].set_xlabel('Reaction Time (ms)')
         axs[1,1].set_ylabel('Count')
-    plt.savefig(rf"C:\Users\Brandon\Desktop\PhD\Baseline Dynamics\Baseline-Dynamics\Figures\rt_delays", format='svg')
 
 def binDelaydata(data, minDelay, maxDelay, numBins):
     """Split up free choice data into a dictionary by equally spaced delay time bins
