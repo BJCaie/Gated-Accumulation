@@ -26,7 +26,9 @@ Notebooks:
 -Fits gated and extended LATER model to individual participants, plots model errors
 
 Scripts:
+
 behaviour.py
-- contains necessary functions for processing, analyzing, and plotting behavioural analysis of free choice saccade experiment.
+- contains necessary functions for processing, analyzing, and plotting behavioural analysis of free choice saccade experiment
+  
 gating.py
 - contains model simulation and fitting functions
